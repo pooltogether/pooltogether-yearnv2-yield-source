@@ -70,13 +70,13 @@ contract YearnV2YieldSource is IYieldSource, ERC20Upgradeable, OwnableUpgradeabl
         public 
         initializer
     {
-        require(address(vault) == address(0), "earnV2YieldSource:: already initialized");
-        require(_vault.token() == address(_token), "earnV2YieldSource:: incorrect vault");
-        require(_vault.activation() != uint256(0), "earnV2YieldSource:: vault not initialized");
+        require(address(vault) == address(0), "YearnV2YieldSource:: already initialized");
+        require(_vault.token() == address(_token), "YearnV2YieldSource:: incorrect vault");
+        require(_vault.activation() != uint256(0), "YearnV2YieldSource:: vault not initialized");
         // NOTE: Vaults from 0.3.2 to 0.3.4 have dips in shareValue
-        require(!areEqualStrings(_vault.apiVersion(), "0.3.2"), "earnV2YieldSource:: vault not compatible");
-        require(!areEqualStrings(_vault.apiVersion(), "0.3.3"), "earnV2YieldSource:: vault not compatible");
-        require(!areEqualStrings(_vault.apiVersion(), "0.3.4"), "earnV2YieldSource:: vault not compatible");
+        require(!areEqualStrings(_vault.apiVersion(), "0.3.2"), "YearnV2YieldSource:: vault not compatible");
+        require(!areEqualStrings(_vault.apiVersion(), "0.3.3"), "YearnV2YieldSource:: vault not compatible");
+        require(!areEqualStrings(_vault.apiVersion(), "0.3.4"), "YearnV2YieldSource:: vault not compatible");
 
         vault = _vault;
         token = _token;
@@ -117,16 +117,16 @@ contract YearnV2YieldSource is IYieldSource, ERC20Upgradeable, OwnableUpgradeabl
     /// @dev Shares corresponding to the number of tokens supplied are mint to the user's balance
     /// @dev Asset tokens are supplied to the yield source, then deposited into Aave
     /// @param _amount The amount of asset tokens to be supplied
-    /// @param to The user whose balance will receive the tokens
+    /// @param to The user whose balance will receive the share tokens
     function supplyTokenTo(uint256 _amount, address to) external override nonReentrant {
-        uint256 shares = _tokenToShares(_amount);
-
-        _mint(to, shares);
-
-        // NOTE: we have to deposit after calculating shares to mint
+        
         token.safeTransferFrom(msg.sender, address(this), _amount);
 
-        _depositInVault();
+        uint256 amountDeposited = _depositInVault();
+        
+        uint256 shares = _tokenToShares(amountDeposited);
+
+        _mint(to, shares);
 
         emit SuppliedTokenTo(msg.sender, shares, _amount, to);
     }

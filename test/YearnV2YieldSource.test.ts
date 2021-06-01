@@ -117,7 +117,7 @@ describe('yearnV2YieldSource', () => {
         await expect(hardhatYearnYieldSourceHarness.initialize(
           vault.address,
           underlyingToken.address
-        )).to.be.revertedWith("!vault not compatible")
+        )).to.be.revertedWith("YearnV2YieldSource:: vault not compatible")
       })
     }
 })
@@ -298,7 +298,7 @@ describe('yearnV2YieldSource', () => {
     it('should not allow to set losses over 100%', async () => {
       await expect(
         yearnV2YieldSource.connect(yieldSourceOwner).setMaxLosses(11_000)
-      ).to.be.revertedWith('!losses set too high');
+      ).to.be.revertedWith('YearnV2YieldSource:: losses set too high');
 
     })
 
